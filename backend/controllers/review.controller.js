@@ -5,6 +5,11 @@ exports.addReview = async (req, res) => {
   try {
     const { productId } = req.params;
     const { rating, comment } = req.body;
+    // console.log(req);
+
+    if (req.user.role !== "user") {
+      return res.status(400).json({ message: "only user can add a review" });
+    }
 
     if (!rating || !comment) {
       return res
@@ -25,6 +30,11 @@ exports.addReview = async (req, res) => {
     });
 
     await review.save();
+
+    // Add review ID to the product's reviews array
+    product.reviews.push(review._id);
+    await product.save();
+
     res.status(201).json({ message: "Review added successfully", review });
   } catch (error) {
     console.error("Add Review Error:", error);

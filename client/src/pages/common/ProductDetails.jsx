@@ -262,13 +262,52 @@ const ProductDetails = () => {
 
             {/* Farmer Details Section (replaces VendorRow) */}
             {product.vendor && (
-                <div className="px-4 md:px-16 mt-12 flex justify-center">
-                    <div className="h-64 w-64 rounded-full overflow-hidden shadow-md">
-                        <img
-                            src={product.farmerImage || "/api/placeholder/400/400"}
-                            alt={product.vendor.fullName || "Farmer"}
-                            className="w-full h-full object-cover object-center"
-                        />
+                <div className="px-4 md:px-16 mt-12 flex flex-col justify-start space-y-6">
+                    <div className="text-2xl font-bold text-gray-800">Know the Farmer</div>
+                    <div className="flex flex-col md:flex-row items-start gap-8">
+                        <div className="h-64 w-64 rounded-full overflow-hidden shadow-md">
+                            <img
+                                src={product.farmerImage || "/api/placeholder/400/400"}
+                                alt={product.vendor.fullName || "Farmer"}
+                                className="w-full h-full object-cover object-center"
+                            />
+                        </div>
+
+                        <div className="max-w-2xl space-y-4">
+                            <h3 className="text-xl font-semibold text-gray-800">
+                                {product.vendor.fullName || "Sarah Johnson"}
+                            </h3>
+
+                            <div className="flex items-center text-gray-600">
+                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                <span>{product.vendor.location || "Greenfield Farm, Sonoma County, CA"}</span>
+                            </div>
+
+                            <div className="text-gray-700">
+                                <span className="font-medium">Experience:</span> {product.vendor.experience || "15+ years of sustainable farming"}
+                            </div>
+
+                            <div>
+                                <h4 className="font-medium text-gray-800 mb-1">About:</h4>
+                                <p className="text-gray-600">
+                                    {product.vendor.about || "I'm a passionate farmer dedicated to growing nutritious, organic produce while preserving the health of our soil and ecosystem. My family has been farming for three generations, and we take pride in bringing the freshest seasonal harvests directly to your table."}
+                                </p>
+                            </div>
+
+                            <div>
+                                <h4 className="font-medium text-gray-800 mb-1">Farming Practices:</h4>
+                                <p className="text-gray-600">
+                                    {product.vendor.farming_practices || "Our farm follows organic and regenerative agriculture principles. We use natural pest management, crop rotation, and composting to maintain soil fertility. All our produce is non-GMO, and we prioritize water conservation through efficient irrigation systems."}
+                                </p>
+                            </div>
+
+                            <button className="mt-2 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded transition duration-200">
+                                Contact Farmer
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
