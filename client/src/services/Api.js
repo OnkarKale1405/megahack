@@ -1,6 +1,6 @@
 //All the API endpoints will be declared here and then this will be used in entire frontend to access the endpoints...
 
-const BaseURL = "http://localhost:5000/api/";
+export const BaseURL = "http://localhost:5000/api/";
 // const BaseURL = import.meta.env.VITE_URL;
 
 export const authEndpoints = {

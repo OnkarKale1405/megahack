@@ -8,7 +8,7 @@ const store = configureStore({
     reducer: {
         auth: AuthSlice,
         market: MarketSlice,
-        product: ProductsSlice,
+        products: ProductsSlice,
     }
 });
 
