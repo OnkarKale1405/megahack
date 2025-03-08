@@ -43,6 +43,7 @@ const LeafletMap = ({ center, locations, routePath, steps }) => {
             center={center}
             zoom={13}
             style={{ height: "600px", width: "100%" }}
+            className="z-1"
         >
             <TileLayer
                 url={`https://api.maptiler.com/maps/basic-v2/256/{z}/{x}/{y}.png?key=${MAPTILER_API_KEY}`}

@@ -85,20 +85,20 @@ exports.getChatbotResponse = async (req, res) => {
         }
 
         // ✅ Get Product Reviews
-        else if (lowerMessage.includes("product reviews")) {
-            const reviews = await Review.find()
-                .populate("product", "name price")
-                .limit(5);
-            responseMessage =
-                reviews.length > 0
-                    ? "Here are some product reviews:\n" +
-                    reviews
-                        .map(
-                            (r) => `- ${r.product.name}: ${r.comment} (⭐ ${r.rating}/5)`
-                        )
-                        .join("\n")
-                    : "No reviews available.";
-        }
+        // else if (lowerMessage.includes("product reviews")) {
+        //     const reviews = await Review.find()
+        //         .populate("product", "name price")
+        //         .limit(5);
+        //     responseMessage =
+        //         reviews.length > 0
+        //             ? "Here are some product reviews:\n" +
+        //             reviews
+        //                 .map(
+        //                     (r) => `- ${r.product.name}: ${r.comment} (⭐ ${r.rating}/5)`
+        //                 )
+        //                 .join("\n")
+        //             : "No reviews available.";
+        // }
 
         // ✅ Step 3: AI Response (Fallback)
         if (responseMessage === "Sorry, I didn't understand your request.") {
