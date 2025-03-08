@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-    marketplace: [],
+    marketplace: JSON.parse(localStorage.getItem('marketplace')) || [],
 };
 
 const MarketSlice = createSlice({
@@ -10,14 +10,16 @@ const MarketSlice = createSlice({
     reducers: {
         setMarketplace: (state, action) => {
             state.marketplace = action.payload;
+            localStorage.setItem('marketplace', JSON.stringify(action.payload));
         },
     },
 });
 
 export const { setMarketplace } = MarketSlice.actions;
 
-export const getMarkets = state =>  state.marketplace.marketplace;
+// Selectors
+export const getMarkets = state => state.market.marketplace;
 export const selectMarketById = (state, id) =>
-    state.marketplace.marketplace.find(item => item.id === id);
+    state.market.marketplace.find(item => item._id === id);
 
 export default MarketSlice.reducer;

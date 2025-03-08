@@ -3,137 +3,28 @@ import ProfileMap from "../../components/ProfileMap.jsx"
 import { selectAccount } from "../../app/AuthSlice.js"
 
 import LeafletMap from '../../components/LeafletMap.jsx';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
-
-const markets = [
-    {
-        name: "Palghar vegetabels market ",
-        location: {
-            type: "Point",
-            coordinates: [
-                72.77048122116975, // longitude
-                19.69881049399968, // latitude
-            ]
-        },
-        image: "https://res.cloudinary.com/dwdsmwb3z/image/upload/v1741377358/marketplaces/ivygc0pzcq3wpu02qr87.jpg",
-        createdBy: "67ca9a0ab138b505911ed14f",
-        _id: "67cb4f4b0cb49798dd8a1058",
-    }
-]
+import { selectMarketById } from '../../app/MarketSlice.js';
+import { useNavigate, useParams } from 'react-router-dom';
+import { getProducts } from '../../app/ProductsSlice.js';
+import { getSpecificMarketProducts } from '../../services/repository/productRepo.js';
 
 export default function Products() {
-    // Sample farm products data with marketId added
-    const allProducts = [
-        {
-            id: 1,
-            name: 'Organic Tomatoes',
-            href: '#',
-            imageSrc: '/api/placeholder/400/320',
-            imageAlt: "Fresh organic tomatoes from local farms",
-            price: '$4.99',
-            category: 'Vegetables',
-            farm: 'Sunrise Farms',
-            inStock: true,
-            marketId: 1
-        },
-        {
-            id: 2,
-            name: 'Farm Fresh Eggs',
-            href: '#',
-            imageSrc: '/api/placeholder/400/320',
-            imageAlt: "Dozen free-range eggs",
-            price: '$5.50',
-            category: 'Dairy & Eggs',
-            farm: 'Green Valley Ranch',
-            inStock: true,
-            marketId: 1
-        },
-        {
-            id: 3,
-            name: 'Honey (16oz)',
-            href: '#',
-            imageSrc: '/api/placeholder/400/320',
-            imageAlt: "Jar of local wildflower honey",
-            price: '$8.99',
-            category: 'Pantry',
-            farm: 'Beehive Meadows',
-            inStock: true,
-            marketId: 1
-        },
-        {
-            id: 4,
-            name: 'Organic Kale',
-            href: '#',
-            imageSrc: '/api/placeholder/400/320',
-            imageAlt: "Bundle of fresh organic kale",
-            price: '$3.49',
-            category: 'Vegetables',
-            farm: 'Sunrise Farms',
-            inStock: false,
-            marketId: 2
-        },
-        {
-            id: 5,
-            name: 'Apple Cider (1 Gallon)',
-            href: '#',
-            imageSrc: '/api/placeholder/400/320',
-            imageAlt: "Jug of fresh pressed apple cider",
-            price: '$7.99',
-            category: 'Beverages',
-            farm: 'Orchard Hills',
-            inStock: true,
-            marketId: 1
-        },
-        {
-            id: 6,
-            name: 'Goat Cheese',
-            href: '#',
-            imageSrc: '/api/placeholder/400/320',
-            imageAlt: "Package of artisanal goat cheese",
-            price: '$6.50',
-            category: 'Dairy & Eggs',
-            farm: 'Meadow Creek Dairy',
-            inStock: true,
-            marketId: 2
-        },
-        {
-            id: 7,
-            name: 'Fresh Strawberries',
-            href: '#',
-            imageSrc: '/api/placeholder/400/320',
-            imageAlt: "Basket of fresh picked strawberries",
-            price: '$4.25',
-            category: 'Fruit',
-            farm: 'Berry Good Farms',
-            inStock: true,
-            marketId: 2
-        },
-        {
-            id: 8,
-            name: 'Grass-Fed Ground Beef (1lb)',
-            href: '#',
-            imageSrc: '/api/placeholder/400/320',
-            imageAlt: "Package of local grass-fed ground beef",
-            price: '$9.99',
-            category: 'Meat',
-            farm: 'Green Valley Ranch',
-            inStock: true,
-            marketId: 1
-        }
-    ];
-
     // State for filters
+    const { marketId } = useParams();
+    const [allProducts, setAllProducts] = useState([]);
+
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [selectedFarms, setSelectedFarms] = useState([]);
-    const [priceRange, setPriceRange] = useState(10);
+    const [priceRange, setPriceRange] = useState(200);
     const [inStockOnly, setInStockOnly] = useState(false);
     const [filteredProducts, setFilteredProducts] = useState(allProducts);
 
     // Get unique categories and farms for filter options
     const categories = [...new Set(allProducts.map(product => product.category))];
-    const farms = [...new Set(allProducts.map(product => product.farm))];
+    const vendors = [...new Set(allProducts.map(product => product.vendor?.fullName))];
 
     // Filter products based on selected filters
     useEffect(() => {
@@ -153,25 +44,25 @@ export default function Products() {
             );
         }
 
-        // Filter by farm
+        // Filter by farm/vendor
         if (selectedFarms.length > 0) {
             results = results.filter(product =>
-                selectedFarms.includes(product.farm)
+                selectedFarms.includes(product.vendor?.fullName)
             );
         }
 
         // Filter by price
         results = results.filter(product =>
-            parseFloat(product.price.replace('$', '')) <= priceRange
+            parseFloat(product.price) <= priceRange
         );
 
         // Filter by stock
         if (inStockOnly) {
-            results = results.filter(product => product.inStock);
+            results = results.filter(product => product.quantity > 0);
         }
 
         setFilteredProducts(results);
-    }, [searchTerm, selectedCategories, selectedFarms, priceRange, inStockOnly]);
+    }, [searchTerm, selectedCategories, selectedFarms, priceRange, inStockOnly, allProducts]);
 
     const acc = useSelector(selectAccount);
     const reversedCoordinates = [...acc.location.coordinates].reverse();
@@ -180,12 +71,28 @@ export default function Products() {
     const [steps, setSteps] = useState([]);
     const [mode, setMode] = useState("drive");
 
+    const dispatch = useDispatch();
+    // console.log("id: ", marketId);
+    const market = useSelector(state => selectMarketById(state, marketId));
+    // console.log(market);
+    const products = useSelector(getProducts);
+    const navigate = useNavigate();
+
     useEffect(() => {
-        const fetchRoute = async (lat, lon) => {
+        const fetchProducts = async () => {
+            dispatch(getSpecificMarketProducts(marketId));
+
+            setAllProducts(products);
+        }
+        fetchProducts();
+    }, [])
+
+    useEffect(() => {
+
+        const fetchRoute = async () => {
             try {
-                console.log(import.meta.env.VITE_GEOAPIFY_API_KEY);
                 const routeResponse = await axios.get(
-                    `https://api.geoapify.com/v1/routing?waypoints=${acc.location.coordinates[1]},${acc.location.coordinates[0]}|19.69881049399968,72.77048122116975&mode=drive&apiKey=${import.meta.env.VITE_GEOAPIFY_API_KEY}`
+                    `https://api.geoapify.com/v1/routing?waypoints=${acc.location.coordinates[1]},${acc.location.coordinates[0]}|${market.location.coordinates[1]},${market.location.coordinates[0]}&mode=${mode}&apiKey=${import.meta.env.VITE_GEOAPIFY_API_KEY}`
                 );
 
                 if (routeResponse.data.features.length > 0) {
@@ -210,7 +117,12 @@ export default function Products() {
             }
         };
         fetchRoute();
-    }, [])
+    }, [mode])
+
+    useEffect(() => {
+        setAllProducts(products);
+    }, [products])
+
     // Handle category filter changes
     const handleCategoryChange = (category) => {
         if (selectedCategories.includes(category)) {
@@ -272,14 +184,14 @@ export default function Products() {
                                 {/* Price Range */}
                                 <div>
                                     <label htmlFor="price-range" className="block text-sm font-semibold text-gray-700 mb-2">
-                                        Max Price: ${priceRange}
+                                        Max Price: ₹{priceRange}
                                     </label>
                                     <input
                                         type="range"
                                         id="price-range"
                                         min="1"
-                                        max="20"
-                                        step="0.5"
+                                        max="200"
+                                        step="5"
                                         value={priceRange}
                                         onChange={(e) => setPriceRange(parseFloat(e.target.value))}
                                         className="w-full h-2 bg-green-100 rounded-lg appearance-none cursor-pointer focus:ring-green-600"
@@ -302,16 +214,16 @@ export default function Products() {
                                 </div>
 
                                 <div className="flex items-center">
-                                    <label htmlFor="farm-filter" className="text-sm font-semibold text-gray-700 mr-3">Farm:</label>
+                                    <label htmlFor="farm-filter" className="text-sm font-semibold text-gray-700 mr-3">Vendor:</label>
                                     <select
                                         id="farm-filter"
                                         className="rounded-lg border border-gray-300 shadow-sm p-2 focus:border-green-600 focus:ring-green-600 text-sm"
                                         onChange={(e) => setSelectedFarms(e.target.value ? [e.target.value] : [])}
                                         value={selectedFarms.length === 1 ? selectedFarms[0] : ""}
                                     >
-                                        <option value="">All Farms</option>
-                                        {farms.map((farm) => (
-                                            <option key={farm} value={farm}>{farm}</option>
+                                        <option value="">All Vendors</option>
+                                        {vendors.map((vendor) => (
+                                            <option key={vendor} value={vendor}>{vendor}</option>
                                         ))}
                                     </select>
                                 </div>
@@ -323,7 +235,7 @@ export default function Products() {
                                             setSelectedCategories([]);
                                             setSelectedFarms([]);
                                             setInStockOnly(false);
-                                            setPriceRange(10);
+                                            setPriceRange(200);
                                         }}
                                         className="ml-auto text-sm text-green-600 hover:text-green-800 font-semibold"
                                     >
@@ -344,14 +256,15 @@ export default function Products() {
                         ) : (
                             <div className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
                                 {filteredProducts.map((product) => (
-                                    <div key={product.id} className="group relative bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
+                                    <div key={product._id} className="group relative bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200"
+                                        onClick={() => navigate(`/product-details/${product._id}`)}>
                                         <div className="relative h-48">
                                             <img
-                                                src={product.imageSrc}
-                                                alt={product.imageAlt}
+                                                src={product.images && product.images.length > 0 ? product.images[0] : 'placeholder-image.jpg'}
+                                                alt={product.name}
                                                 className="h-full w-full object-cover object-center group-hover:opacity-75"
                                             />
-                                            {!product.inStock && (
+                                            {product.quantity <= 0 && (
                                                 <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
                                                     Out of Stock
                                                 </div>
@@ -361,22 +274,20 @@ export default function Products() {
                                             <div className="flex justify-between items-start">
                                                 <div>
                                                     <h3 className="text-sm font-medium text-gray-900">
-                                                        <a href={product.href}>
-                                                            <span aria-hidden="true" className="absolute inset-0" />
-                                                            {product.name}
-                                                        </a>
+                                                        <span aria-hidden="true" className="absolute inset-0" />
+                                                        {product.name}
                                                     </h3>
-                                                    <p className="mt-1 text-sm text-gray-500">{product.farm}</p>
+                                                    <p className="mt-1 text-sm text-gray-500">{product.vendor?.fullName}</p>
                                                     <div className="mt-1 flex items-center">
                                                         <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
                                                             {product.category}
                                                         </span>
                                                         <span className="ml-2 inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
-                                                            {product.marketId}
+                                                            Qty: {product.quantity}
                                                         </span>
                                                     </div>
                                                 </div>
-                                                <p className="text-sm font-medium text-gray-900">{product.price}</p>
+                                                <p className="text-sm font-medium text-gray-900">₹{product.price}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -387,9 +298,30 @@ export default function Products() {
                 </div>
 
                 {/* Right Section (40%) - Empty for Map */}
-                <div className="lg:w-2/5 h-full flex items-center justify-center">
-                    <LeafletMap center={mapCenter} locations={markets} routePath={routePath} steps={steps} />
+                <div className="lg:w-2/5 h-full flex flex-col items-center justify-center gap-4">
+                    {/* Dropdown for Mode Selection */}
+                    <div className="mb-2 w-full">
+                        <label htmlFor="mode" className="block text-sm font-medium text-gray-700">
+                            Select Mode:
+                        </label>
+                        <select
+                            id="mode"
+                            value={mode}
+                            onChange={(e) => setMode(e.target.value)}
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                        >
+                            <option value="drive">Drive</option>
+                            <option value="motorcycle">Motorcycle</option>
+                            <option value="bus">Bus</option>
+                        </select>
+                    </div>
+
+                    {/* Map Display */}
+                    <div className="w-full h-full flex items-center justify-center">
+                        <LeafletMap center={mapCenter} locations={[market]} routePath={routePath} steps={steps} />
+                    </div>
                 </div>
+
             </div>
         </div>
     );

@@ -1,23 +1,57 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectAccount } from '../app/AuthSlice';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../services/repository/userRepo';
+import axios from 'axios';
 
 const Welcome = () => {
     const account = useSelector(selectAccount);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
+    const [selectedFile, setSelectedFile] = useState(null);
+
     const handleLogout = () => {
         dispatch(logout(navigate));
         navigate('/login');
     };
 
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        setSelectedFile(file);
+        console.log("Selected file:", file);
+    };
+
+    const handleFileUpload = async () => {
+        if (!selectedFile) {
+            alert("Please select a file first.");
+            return;
+        }
+
+        const formData = new FormData();
+
+        formData.append("image", selectedFile);
+        formData.append("username", account.username); 
+
+        try {
+            const response = await axios.post("http://localhost:5000/api/upload", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+            console.log("File uploaded successfully:", response.data);
+            alert("File uploaded successfully!");
+        } catch (error) {
+            console.error("File upload failed:", error);
+            alert("File upload failed. Please try again.");
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md mx-auto bg-white rounded-xl shadow-sm overflow-hidden md:max-w-2xl">
-                <div className="md:flex">   
+                <div className="md:flex">
                     <div className="p-8 w-full">
                         <div className="flex justify-end items-center mb-6">
                             <button
@@ -54,29 +88,29 @@ const Welcome = () => {
                                 {account.role_id && (
                                     <div className="flex justify-between">
                                         <span className="text-gray-500">Role:</span>
-                                        <span className="font-medium text-gray-800">{account.role_id === 1 ? "Admin" : account.role_id === 2 ? "User": "Farmer"}</span>
+                                        <span className="font-medium text-gray-800">
+                                            {account.role_id === 1 ? "Admin" : account.role_id === 2 ? "User" : "Farmer"}
+                                        </span>
                                     </div>
                                 )}
                             </div>
                         </div>
 
-                        {/* <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-4">
-                            <h3 className="text-indigo-800 font-medium mb-2">Quick Actions</h3>
-                            <div className="grid grid-cols-2 gap-2">
-                                <button className="bg-white p-3 rounded-md text-sm text-gray-700 hover:bg-indigo-100 transition-colors duration-150 border border-gray-200">
-                                    Edit Profile
-                                </button>
-                                <button className="bg-white p-3 rounded-md text-sm text-gray-700 hover:bg-indigo-100 transition-colors duration-150 border border-gray-200">
-                                    Settings
-                                </button>
-                                <button className="bg-white p-3 rounded-md text-sm text-gray-700 hover:bg-indigo-100 transition-colors duration-150 border border-gray-200">
-                                    My Activity
-                                </button>
-                                <button className="bg-white p-3 rounded-md text-sm text-gray-700 hover:bg-indigo-100 transition-colors duration-150 border border-gray-200">
-                                    Help Center
-                                </button>
-                            </div>
-                        </div> */}
+                        {/* File Upload Section */}
+                        <div className="bg-gray-50 p-4 rounded-lg mb-6">
+                            <h3 className="text-lg font-medium text-gray-800 mb-2">Upload File</h3>
+                            <input
+                                type="file"
+                                onChange={handleFileChange}
+                                className="mb-3 block w-full text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer bg-white focus:outline-none"
+                            />
+                            <button
+                                onClick={handleFileUpload}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                            >
+                                Upload
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

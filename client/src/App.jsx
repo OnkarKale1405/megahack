@@ -44,8 +44,8 @@ function App() {
         {/* <Route element={<SidebarLayout />}> */}
         <Route path='/markets' element={<Market />} />
         <Route path='/welcome' element={<Welcome />} />
-        <Route path='/products/:id' element={<Products />} />
-        <Route path='/product-details' element={<ProductDetails />} />
+        <Route path='/products/:marketId' element={<Products />} />
+        <Route path='/product-details/:productId' element={<ProductDetails />} />
         {/* </Route> */}
       </Route>
 
@@ -53,6 +53,7 @@ function App() {
       <Route element={<RequireAuth allowedRoles={["vendor"]} />}>
         <Route path='/vendor' element={<SidebarLayout />} >
           <Route path='markets' element={<Market />} />
+          <Route path='welcome' element={<Welcome />} />
           <Route path='add' element={<CreateProduct />} />
         </Route>
       </Route>

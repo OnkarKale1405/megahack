@@ -1,7 +1,8 @@
 import { toast } from 'react-hot-toast';
 import { apiConnector } from '../Connector';
 import { productEndPoints } from "../Api"
-const { GET_PENDING_PRODUCTS, GET_PRODUCT_BY_ID, DELETE_PRODUCT, EDIT_PRODUCT, CREATE_PRODUCT, APPROVE_PRODUCT, REJECT_PRODUCT } = productEndPoints;
+import { setProducts } from '../../app/ProductsSlice';
+const { GET_PENDING_PRODUCTS, GET_PRODUCT_BY_ID, GET_MARKET_PRODUCTS, DELETE_PRODUCT, EDIT_PRODUCT, CREATE_PRODUCT, APPROVE_PRODUCT, REJECT_PRODUCT } = productEndPoints;
 
 export async function getPendingProducts() {
     const loadingToast = toast.loading("Fetching products...");
@@ -23,9 +24,34 @@ export async function getPendingProducts() {
     toast.dismiss(loadingToast);
 }
 
+export function getSpecificMarketProducts(marketId) {
+    return async (dispatch) => {
+        const loadingToast = toast.loading("Fetching market products...");
+
+        try {
+            const response = await apiConnector("GET", `${GET_MARKET_PRODUCTS}/${marketId}`);
+            // console.log("resp",response);
+
+            if (response.status === 200) {
+                toast.success("Products fetched...");
+                toast.dismiss(loadingToast);
+                dispatch(setProducts(response.data.products));
+            } else {
+                throw new Error(response.data.message);
+            }
+        } catch (error) {
+            console.error("Error fetching market products:", error);
+            toast.error("Error while fetching market products");
+        }
+
+        toast.dismiss(loadingToast);
+    }
+
+}
+
 export async function createProduct(productData) {
     const loadingToast = toast.loading("Creating product...");
-    console.log("insie create Product");
+    // console.log("insie create Product");
 
     try {
         const response = await apiConnector("POST", CREATE_PRODUCT, productData);

@@ -16,7 +16,7 @@ export const apiConnector = (method, url, bodyData, headers, params) => {
     let token;
     if (accountData) {
         token = accountData.token;
-        console.log(token);
+        // console.log(token);
     }
 
     headers = headers || {};

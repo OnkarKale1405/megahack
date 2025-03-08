@@ -20,7 +20,7 @@ export const marketEndPoints = {
 
 export const productEndPoints = {
     GET_PENDING_PRODUCTS: BaseURL + "products/pending",
-    GET_MARKET_PRODUCTS: BaseURL + "products/",
+    GET_MARKET_PRODUCTS: BaseURL + "products/marketplace",
     CREATE_PRODUCT: BaseURL + "products/",
     APPROVE_PRODUCT: BaseURL + "products/approve",
     REJECT_PRODUCT: BaseURL + "products/reject",

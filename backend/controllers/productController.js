@@ -8,7 +8,7 @@ const createProduct = async (req, res) => {
     let { name, description, category, price, quantity, location } = req.body;
     let { farmerImage, images } = req.files;
 
-    console.log(req.body.images);
+    console.log(req.files.images);
 
     if (!location)
       return res.status(400).json({ message: "Location is required" });

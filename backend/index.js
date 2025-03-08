@@ -8,6 +8,7 @@ const authRoutes = require("./routes/authRoutes");
 const marketplaceRoutes = require("./routes/marketplace.routes");
 const productRoutes = require("./routes/product.route");
 const reviewRoutes = require("./routes/review.routes");
+const uploadRouter = require("./routes/upload.route.js");
 
 dotenv.config();
 const app = express();
@@ -30,5 +31,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/marketplaces", marketplaceRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/upload", uploadRouter);
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

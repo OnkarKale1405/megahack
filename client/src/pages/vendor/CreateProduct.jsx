@@ -610,6 +610,9 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { MapPin, Upload, X, ImageIcon, Loader2, Check } from "lucide-react";
+import axios from "axios";
+import { useSelector } from "react-redux";
+import { selectAccount } from "../../app/AuthSlice";
 
 const CreateProduct = () => {
   const [formData, setFormData] = useState({
@@ -620,7 +623,7 @@ const CreateProduct = () => {
     quantity: "",
     location: {
       type: "Point",
-      coordinates: ["", ""], // [longitude, latitude]
+      coordinates: ["", ""],
     },
   });
 
@@ -635,6 +638,7 @@ const CreateProduct = () => {
 
   const imagesRef = useRef(null);
   const farmerImageRef = useRef(null);
+  const acc = useSelector(selectAccount);
 
   const categories = [
     "Vegetables",
@@ -769,21 +773,23 @@ const CreateProduct = () => {
     setError("");
 
     try {
+      console.log("typeof formData:", typeof formData);
+
       const formData1 = new FormData();
 
       // Append text fields
-      formData1.append("name", formData.name);
-      formData1.append("description", formData.description);
-      formData1.append("category", formData.category);
-      formData1.append("price", formData.price);
-      formData1.append("quantity", formData.quantity);
+      formData1.append("name", formData.name ?? "");
+      formData1.append("description", formData.description ?? "");
+      formData1.append("category", formData.category ?? "");
+      formData1.append("price", formData.price ?? "");
+      formData1.append("quantity", formData.quantity ?? "");
 
       // Append location as a JSON string
       const location = {
         type: "Point",
         coordinates: [
-          parseFloat(formData.location.coordinates[0]), // Convert to number
-          parseFloat(formData.location.coordinates[1]), // Convert to number
+          parseFloat(formData.location.coordinates[0]),
+          parseFloat(formData.location.coordinates[1]),
         ],
       };
       formData1.append("location", JSON.stringify(location));
@@ -793,33 +799,32 @@ const CreateProduct = () => {
         formData1.append("farmerImage", farmerImage);
       }
 
-      // Append product images
-      images.forEach((image) => {
-        formData1.append("images", image);
+      images.forEach((file) => {
+        formData1.append("images", file);
       });
+
+      console.log("form dta1: ", formData1);
 
       // Log FormData for debugging
       for (let [key, value] of formData1.entries()) {
         console.log(key, value);
       }
+      console.log("final form data", formData1.get("images"));
 
       // Send request to backend
-      const response = await fetch("http://localhost:5000/api/products/", {
+      const response = await axios.post("http://localhost:5000/api/products/", formData1, {
         method: "POST",
-        body: formData1,
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "Authorization": `Bearer ${acc.token}`,
+        },
       });
 
       // Log the response
-      console.log("Response Status:", response.status);
-      const responseData = await response.json();
-      console.log("Response Data:", responseData);
+      console.log(response);
 
-      if (!response.ok) {
-        throw new Error(responseData.message || "Failed to submit product");
-      }
-
-      setSuccess(true);
-      console.log("Product created successfully:", responseData);
+      // setSuccess(true);
+      // console.log("Product created successfully:", responseData);
     } catch (error) {
       setError(error.message || "Failed to submit the product. Please try again.");
       console.error("Error submitting product:", error);
@@ -987,7 +992,6 @@ const CreateProduct = () => {
                       ref={imagesRef}
                       onChange={handleImagesChange}
                       className="hidden"
-                      accept="image/*"
                       multiple
                     />
                     {previewImages.length > 0 ? (
@@ -1034,7 +1038,6 @@ const CreateProduct = () => {
                       ref={farmerImageRef}
                       onChange={handleFarmerImageChange}
                       className="hidden"
-                      accept="image/*"
                     />
                     {previewFarmerImage ? (
                       <div className="relative">

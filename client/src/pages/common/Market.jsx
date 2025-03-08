@@ -1,17 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getMarketplacesNearUser } from '../../services/repository/marketRepo';
+import { useDispatch, useSelector } from 'react-redux';
+import { getMarkets } from '../../app/marketSlice';
 
 const Market = () => {
     const [markets, setMarkets] = useState([]);
+    const [locationInfo, setLocationInfo] = useState(null);
+    const dispatch = useDispatch();
+    const nearbyMarkets = useSelector(getMarkets);
+    console.log(nearbyMarkets);
 
     useEffect(() => {
         const fetchNearbyMarkets = async () => {
             try {
-                const res = await getMarketplacesNearUser();
-                if (res?.marketplaces) {
-                    setMarkets(res.marketplaces);
-                }
+                dispatch(getMarketplacesNearUser());
+                setMarkets(nearbyMarkets);
             } catch (error) {
                 console.error("Error fetching marketplaces:", error);
             }
@@ -19,10 +23,14 @@ const Market = () => {
         fetchNearbyMarkets();
     }, []);
 
+    useEffect(() => {
+        setMarkets(nearbyMarkets);
+    }, [nearbyMarkets])
+
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 py-6 px-44 h-screen overflow-auto scrollbar-hide">
             {markets.map((market) => (
-                <div key={market._id} className="bg-white rounded-lg shadow-lg">
+                <div key={market._id} className="bg-white h-[350px] rounded-lg shadow-lg">
                     <img
                         src={market.image}
                         alt={market.name}

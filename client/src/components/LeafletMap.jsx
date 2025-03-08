@@ -57,36 +57,6 @@ const LeafletMap = ({ center, locations, routePath, steps }) => {
                     return null;
                 }
 
-                return (
-                    <Marker
-                        key={index}
-                        position={[latitude, longitude]} // Use [latitude, longitude]
-                        eventHandlers={{
-                            click: () => handleNgoClick(market),
-                        }}
-                    >
-                        <Popup>
-                            <div>
-                                <strong>{market.name}</strong>
-                                <img
-                                    src={market.image}
-                                    alt={market.name}
-                                    className="w-32 h-20 rounded-md"
-                                />
-                                {selectedNgo?._id === market._id ? (
-                                    <p className="text-green-600">Route displayed</p>
-                                ) : (
-                                    <button
-                                        className="mt-2 px-2 py-1 bg-blue-500 text-white rounded"
-                                        onClick={() => handleNgoClick(market)}
-                                    >
-                                        Show Route
-                                    </button>
-                                )}
-                            </div>
-                        </Popup>
-                    </Marker>
-                );
             })}
 
 
@@ -134,11 +104,20 @@ const LeafletMap = ({ center, locations, routePath, steps }) => {
                     ))}
 
                     {/* End Marker */}
-                    {steps[steps.length - 1]?.position && (
+                    {steps[steps.length - 1]?.position && selectedNgo && (
                         <Marker position={steps[steps.length - 1].position}>
                             <Popup>
-                                <strong>End of Route</strong>
-                                <p>{steps[steps.length - 1].instruction}</p>
+                                <div>
+                                    <div className="mt-2">
+                                        <strong>{selectedNgo.name}</strong>
+                                        <img
+                                            src={selectedNgo.image}
+                                            alt={selectedNgo.name}
+                                            className="w-32 h-20 rounded-md mt-1"
+                                        />
+                                    </div>
+                                    <p>{steps[steps.length - 1].instruction}</p>
+                                </div>
                             </Popup>
                         </Marker>
                     )}

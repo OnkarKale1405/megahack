@@ -1,51 +1,53 @@
 import { toast } from 'react-hot-toast';
 import { apiConnector } from '../Connector';
 import { marketEndPoints } from "../Api"
+import { setMarketplace } from '../../app/marketSlice';
 const { GET_MARKETS, GET_MARKET_BY_ID, DELETE_MARKET, EDIT_MARKET, GET_MARKETPLACES_NEAR_USER } = marketEndPoints;
 
-export async function getMarketplacesNearUser() {
-    const loadingToast = toast.loading("Fetching nearby marketplaces ...");
+export function getMarketplacesNearUser() {
+    return async (dispatch) => {
+        const loadingToast = toast.loading("Fetching nearby marketplaces ...");
+
+        try {
+            const response = await apiConnector("POST", GET_MARKETPLACES_NEAR_USER, {});
+            console.log("response");
+
+            if (response.status === 200) {
+                toast.success("Nearby markets fetched");
+                toast.dismiss(loadingToast);
+                dispatch(setMarketplace(response.data.marketplaces));
+            } else {
+                throw new Error(response.data.message);
+            }
+        } catch (error) {
+            toast.error("Error while fetching marketplaces");
+        }
+
+        toast.dismiss(loadingToast);
+    }
+}
+
+
+export async function getMarkets() {
+    const loadingToast = toast.loading("Fetching nearby markets ...");
 
     try {
-        const response = await apiConnector("POST", GET_MARKETPLACES_NEAR_USER, {});
+
+        const response = await apiConnector("GET", GET_MARKETS);
 
         if (response.status === 200) {
             toast.success(response.message);
             toast.dismiss(loadingToast);
             return response.data;
+
         } else {
             throw new Error(response.data.message);
         }
     } catch (error) {
-        toast.error("Error while fetching marketplaces");
+        toast.error("Error while fetching markets");
     }
 
     toast.dismiss(loadingToast);
-}
-
-
-export function getMarkets() {
-    return async (dispatch) => {
-        const loadingToast = toast.loading("Fetching nearby markets ...");
-
-        try {
-
-            const response = await apiConnector("GET", GET_MARKETS);
-
-            if (response.status === 200) {
-                toast.success(response.message);
-                toast.dismiss(loadingToast);
-                return response.data;
-
-            } else {
-                throw new Error(response.data.message);
-            }
-        } catch (error) {
-            toast.error("Error while fetching markets");
-        }
-
-        toast.dismiss(loadingToast);
-    };
 }
 
 export function getMarketById(marketId) {

@@ -1,46 +1,52 @@
 import React, { useState } from 'react';
 import VendorRow from '../../components/VendorRow';
+import { useSelector } from 'react-redux';
+import { getProductById } from '../../services/repository/productRepo';
+import { useParams } from 'react-router-dom';
 
 const ProductDetails = () => {
-    const product = {
-        id: 1,
-        name: "Premium Apple",
-        description: "Experience crystal-clear sound with our premium wireless headphones. Featuring noise cancellation technology, 30-hour battery life, and comfortable over-ear design.",
-        price: 129.99,
-        rating: 4.53,
-        quantity: 25,
-        marketplaces: ["Amazon", "Best Buy", "Official Store"],
-        images: [
-            "https://plus.unsplash.com/premium_photo-1661322640130-f6a1e2c36653?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8YXBwbGV8ZW58MHx8MHx8fDA%3D",
-            "https://plus.unsplash.com/premium_photo-1726797776507-6b5cbee36007?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8YXBwbGUlMjBpbiUyMGluZGlhbiUyMG1hcmtldHxlbnwwfHwwfHx8MA%3D%3D",
-            "https://images.unsplash.com/photo-1722670448143-13e318775f67?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8YXBwbGUlMjBpbiUyMGluZGlhbiUyMG1hcmtldHxlbnwwfHwwfHx8MA%3D%3D",
-            "https://images.unsplash.com/photo-1538725058330-43c1c165fa54?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjR8fGFwcGxlJTIwaW4lMjBpbmRpYW4lMjBtYXJrZXR8ZW58MHx8MHx8fDA%3D",
-            "https://images.unsplash.com/photo-1663332129186-bf829f3a9b91?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjN8fGFwcGxlJTIwaW4lMjBpbmRpYW4lMjBtYXJrZXR8ZW58MHx8MHx8fDA%3D",
-        ],
-        details: [
-            "Bluetooth 5.0 connectivity",
-            "Active noise cancellation",
-            "30-hour battery life",
-            "Quick charge (10 min charge = 5 hours playback)",
-            "Premium memory foam ear cushions",
-        ],
-        reviews: [
-            { user: "John D.", rating: 5, comment: "Best headphones I've ever owned! The sound quality is amazing." },
-            { user: "Sarah M.", rating: 4, comment: "Very comfortable for long listening sessions. Battery life is impressive." },
-            { user: "Mike T.", rating: 5, comment: "The noise cancellation feature works better than expected." },
-            { user: "Lisa R.", rating: 4, comment: "Great headphones overall, but I wish they came in more colors." },
-        ],
-        relatedProducts: [
-            { id: 2, name: "Wireless Earbuds", price: 79.99, rating: 4.2, image: "/api/placeholder/200/200" },
-            { id: 3, name: "Headphone Stand", price: 24.99, rating: 4.7, image: "/api/placeholder/200/200" },
-            { id: 4, name: "Bluetooth Speaker", price: 89.99, rating: 4.4, image: "/api/placeholder/200/200" },
-            { id: 5, name: "Wireless Earbuds", price: 79.99, rating: 4.2, image: "/api/placeholder/200/200" },
-            { id: 6, name: "Headphone Stand", price: 24.99, rating: 4.7, image: "/api/placeholder/200/200" },
-            { id: 7, name: "Bluetooth Speaker", price: 89.99, rating: 4.4, image: "/api/placeholder/200/200" },
-        ]
-    };
+    const { productId } = useParams();
+    // const product = {
+    //     id: 1,
+    //     name: "Premium Apple",
+    //     description: "Experience crystal-clear sound with our premium wireless headphones. Featuring noise cancellation technology, 30-hour battery life, and comfortable over-ear design.",
+    //     price: 129.99,
+    //     rating: 4.53,
+    //     quantity: 25,
+    //     marketplaces: ["Amazon", "Best Buy", "Official Store"],
+    //     images: [
+    //         "https://plus.unsplash.com/premium_photo-1661322640130-f6a1e2c36653?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8YXBwbGV8ZW58MHx8MHx8fDA%3D",
+    //         "https://plus.unsplash.com/premium_photo-1726797776507-6b5cbee36007?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8YXBwbGUlMjBpbiUyMGluZGlhbiUyMG1hcmtldHxlbnwwfHwwfHx8MA%3D%3D",
+    //         "https://images.unsplash.com/photo-1722670448143-13e318775f67?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8YXBwbGUlMjBpbiUyMGluZGlhbiUyMG1hcmtldHxlbnwwfHwwfHx8MA%3D%3D",
+    //         "https://images.unsplash.com/photo-1538725058330-43c1c165fa54?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjR8fGFwcGxlJTIwaW4lMjBpbmRpYW4lMjBtYXJrZXR8ZW58MHx8MHx8fDA%3D",
+    //         "https://images.unsplash.com/photo-1663332129186-bf829f3a9b91?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjN8fGFwcGxlJTIwaW4lMjBpbmRpYW4lMjBtYXJrZXR8ZW58MHx8MHx8fDA%3D",
+    //     ],
+    //     details: [
+    //         "Bluetooth 5.0 connectivity",
+    //         "Active noise cancellation",
+    //         "30-hour battery life",
+    //         "Quick charge (10 min charge = 5 hours playback)",
+    //         "Premium memory foam ear cushions",
+    //     ],
+    //     reviews: [
+    //         { user: "John D.", rating: 5, comment: "Best headphones I've ever owned! The sound quality is amazing." },
+    //         { user: "Sarah M.", rating: 4, comment: "Very comfortable for long listening sessions. Battery life is impressive." },
+    //         { user: "Mike T.", rating: 5, comment: "The noise cancellation feature works better than expected." },
+    //         { user: "Lisa R.", rating: 4, comment: "Great headphones overall, but I wish they came in more colors." },
+    //     ],
+    //     relatedProducts: [
+    //         { id: 2, name: "Wireless Earbuds", price: 79.99, rating: 4.2, image: "/api/placeholder/200/200" },
+    //         { id: 3, name: "Headphone Stand", price: 24.99, rating: 4.7, image: "/api/placeholder/200/200" },
+    //         { id: 4, name: "Bluetooth Speaker", price: 89.99, rating: 4.4, image: "/api/placeholder/200/200" },
+    //         { id: 5, name: "Wireless Earbuds", price: 79.99, rating: 4.2, image: "/api/placeholder/200/200" },
+    //         { id: 6, name: "Headphone Stand", price: 24.99, rating: 4.7, image: "/api/placeholder/200/200" },
+    //         { id: 7, name: "Bluetooth Speaker", price: 89.99, rating: 4.4, image: "/api/placeholder/200/200" },
+    //     ]
+    // };
 
     // State for selected image and quantity
+    const fetchedProduct = useSelector(state => getProductById(state, productId));
+    const [product, setProduct] = useState([]);
     const [mainImage, setMainImage] = useState(product.images[0]);
     const [quantity, setQuantity] = useState(1);
 

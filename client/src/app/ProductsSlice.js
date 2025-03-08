@@ -9,6 +9,7 @@ const ProductsSlice = createSlice({
     initialState,
     reducers: {
         setProducts: (state, action) => {
+            // console.log("Products: ", action.payload);
             state.products = action.payload;
         },
         addProduct: (state, action) => {
@@ -33,7 +34,8 @@ const ProductsSlice = createSlice({
 export const { setProducts, addProduct, removeProduct, editProduct } = ProductsSlice.actions;
 
 // Selector to get product by ID
+export const getProducts = (state) => state.product.products;
 export const selectProductById = (state, id) =>
-    state.products.products.find(product => product.id === id);
+    state.product.products.find(product => product._id === id);
 
 export default ProductsSlice.reducer;
