@@ -21,6 +21,7 @@ import Approvals from './pages/admin/Approvals.jsx';
 //layouts
 import SidebarLayout from './layout/SidebarLayout.jsx';
 import CreateProduct from './pages/vendor/CreateProduct.jsx';
+import ChatbotLayout from './layout/ChatbotLayout.jsx';
 
 function App() {
   return (
@@ -41,12 +42,12 @@ function App() {
       </Route>
 
       <Route element={<RequireAuth allowedRoles={["user"]} />}>
-        {/* <Route element={<SidebarLayout />}> */}
-        <Route path='/markets' element={<Market />} />
-        <Route path='/welcome' element={<Welcome />} />
-        <Route path='/products/:marketId' element={<Products />} />
-        <Route path='/product-details/:productId' element={<ProductDetails />} />
-        {/* </Route> */}
+        <Route element={<ChatbotLayout />}>
+          <Route path='/markets' element={<Market />} />
+          <Route path='/welcome' element={<Welcome />} />
+          <Route path='/products/:marketId' element={<Products />} />
+          <Route path='/product-details/:productId' element={<ProductDetails />} />
+        </Route>
       </Route>
 
 
